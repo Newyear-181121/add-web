@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  app-dev-manager:
+    image: add_bookmark:v-001
+    container_name: ny-add-bookmark-dev
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./src:/app  # 将当前目录挂载到容器的/app目录
+      - ./configs:/app/configs  # 挂载配置目录，支持多个文件
+    environment:
+      - FLASK_DEBUG=1  # 启用Flask调试模式
+    command: flask run --host=0.0.0.0 --port=5000  # 使用Flask开发服务器

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>配置文件管理</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3b82f6',
+            secondary: '#10b981',
+            danger: '#ef4444',
+            dark: '#1e293b',
+            light: '#f8fafc',
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .transition-custom {
+        transition: all 0.3s ease;
+      }
+      .shadow-custom {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      }
+      .card-hover {
+        @apply hover:shadow-lg hover:-translate-y-1 transition-all duration-300;
+      }
+    }
+  </style>
+</head>
+<body class="font-inter bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+  <!-- 顶部导航栏 -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <i class="fa fa-cogs text-primary text-2xl"></i>
+        <h1 class="text-xl font-bold text-dark">配置文件管理系统</h1>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button id="refreshBtn" class="flex items-center space-x-1 text-gray-600 hover:text-primary transition-custom">
+          <i class="fa fa-refresh"></i>
+          <span>刷新</span>
+        </button>
+        <button id="helpBtn" class="flex items-center space-x-1 text-gray-600 hover:text-primary transition-custom">
+          <i class="fa fa-question-circle"></i>
+          <span>帮助</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容区 -->
+  <main class="flex-grow container mx-auto px-4 py-6">
+    <div class="bg-white rounded-xl shadow-custom p-5">
+      <h2 class="text-xl font-bold text-dark mb-4">配置文件管理</h2>
+      
+      <!-- 当前配置信息 -->
+      <div class="bg-blue-50 border-l-4 border-primary p-4 mb-6 rounded-r">
+        <div class="flex items-center">
+          <i class="fa fa-info-circle text-primary mr-3 text-xl"></i>
+          <div>
+            <h3 class="font-medium text-dark">当前活动配置</h3>
+            <p id="currentConfig" class="text-gray-700 mt-1">加载中...</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 配置文件选择 -->
+      <div class="mb-6">
+        <h3 class="font-medium text-dark mb-3">选择配置文件</h3>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-grow">
+            <select id="configSelect" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-custom appearance-none">
+              <option value="">请选择配置文件...</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+              <i class="fa fa-chevron-down text-gray-400"></i>
+            </div>
+          </div>
+          
+          <button id="switchConfigBtn" class="bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg font-medium flex items-center justify-center space-x-2 transition-custom shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            <i class="fa fa-exchange"></i>
+            <span>切换配置</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- 配置文件预览 -->
+      <div id="configPreview" class="mt-6 hidden">
+        <h3 class="font-medium text-dark mb-3">配置预览</h3>
+        <div class="bg-gray-800 text-gray-100 rounded-md p-3 overflow-x-auto text-sm font-mono max-h-60">
+          <pre id="configContent"></pre>
+        </div>
+      </div>
+      
+      <!-- 配置文件列表 -->
+      <div class="mt-8">
+        <h3 class="font-medium text-dark mb-3">配置文件列表</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">文件名</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">大小</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">修改时间</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+              </tr>
+            </thead>
+            <tbody id="configTableBody" class="bg-white divide-y divide-gray-200">
+              <!-- 配置文件列表将通过JavaScript动态加载 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="bg-white border-t border-gray-200 py-6">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-4 md:mb-0">
+          <p class="text-sm text-gray-500">© 2023 配置文件管理系统. 保留所有权利.</p>
+        </div>
+        <div class="flex space-x-6">
+          <a href="#" class="text-gray-500 hover:text-primary transition-custom">
+            <i class="fa fa-github text-xl"></i>
+          </a>
+          <a href="#" class="text-gray-500 hover:text-primary transition-custom">
+            <i class="fa fa-twitter text-xl"></i>
+          </a>
+          <a href="#" class="text-gray-500 hover:text-primary transition-custom">
+            <i class="fa fa-linkedin text-xl"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 通知提示框 -->
+  <div id="notification" class="fixed bottom-4 right-4 p-4 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-3 z-50">
+    <div id="notificationIcon" class="flex-shrink-0">
+      <i class="fa fa-check-circle text-xl"></i>
+    </div>
+    <div class="flex-grow">
+      <h4 id="notificationTitle" class="font-medium text-white"></h4>
+      <p id="notificationMessage" class="text-sm text-white/80 mt-1"></p>
+    </div>
+    <button id="closeNotification" class="flex-shrink-0 text-white/80 hover:text-white">
+      <i class="fa fa-times"></i>
+    </button>
+  </div>
+
+  <!-- 加载动画 -->
+  <div id="loadingOverlay" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl p-6 shadow-2xl flex flex-col items-center">
+      <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <p class="mt-4 font-medium text-gray-800">处理中...</p>
+    </div>
+  </div>
+
+  <script>
+    // DOM元素
+    const configSelect = document.getElementById('configSelect');
+    const switchConfigBtn = document.getElementById('switchConfigBtn');
+    const configPreview = document.getElementById('configPreview');
+    const configContent = document.getElementById('configContent');
+    const configTableBody = document.getElementById('configTableBody');
+    const currentConfig = document.getElementById('currentConfig');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const notification = document.getElementById('notification');
+    const notificationTitle = document.getElementById('notificationTitle');
+    const notificationMessage = document.getElementById('notificationMessage');
+    const notificationIcon = document.getElementById('notificationIcon');
+    const closeNotification = document.getElementById('closeNotification');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    // 初始化页面
+    async function initPage() {
+      await loadConfigFiles();
+      await loadActiveConfig();
+      setupEventListeners();
+    }
+
+    // 加载配置文件列表
+    async function loadConfigFiles() {
+      try {
+        showLoading();
+        
+        const response = await fetch('/api/config/files');
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          // 清空现有选项
+          configSelect.innerHTML = '<option value="">请选择配置文件...</option>';
+          configTableBody.innerHTML = '';
+          
+          // 添加配置文件选项
+          data.data.forEach(config => {
+            const option = document.createElement('option');
+            option.value = config.name;
+            option.textContent = config.name;
+            configSelect.appendChild(option);
+            
+            // 添加到表格
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-50 transition-custom';
+            
+            const nameCell = document.createElement('td');
+            nameCell.className = 'px-6 py-4 whitespace-nowrap';
+            nameCell.innerHTML = `
+              <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-md flex items-center justify-center">
+                  <i class="fa fa-file-code-o text-primary"></i>
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">${config.name}</div>
+                </div>
+              </div>
+            `;
+            
+            const sizeCell = document.createElement('td');
+            sizeCell.className = 'px-6 py-4 whitespace-nowrap';
+            sizeCell.innerHTML = `
+              <div class="text-sm text-gray-500">${config.size}</div>
+            `;
+            
+            const modifiedCell = document.createElement('td');
+            modifiedCell.className = 'px-6 py-4 whitespace-nowrap';
+            modifiedCell.innerHTML = `
+              <div class="text-sm text-gray-500">${config.modified}</div>
+            `;
+            
+            const statusCell = document.createElement('td');
+            statusCell.className = 'px-6 py-4 whitespace-nowrap';
+            
+            const actionCell = document.createElement('td');
+            actionCell.className = 'px-6 py-4 whitespace-nowrap text-right text-sm font-medium';
+            
+            // 检查是否为当前活动配置
+            if (currentConfig.textContent === config.name) {
+              statusCell.innerHTML = `
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                  已激活
+                </span>
+              `;
+              actionCell.innerHTML = `
+                <button class="text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed" disabled>
+                  <i class="fa fa-check-circle"></i> 已激活
+                </button>
+              `;
+              option.selected = true;
+            } else {
+              statusCell.innerHTML = `
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                  未激活
+                </span>
+              `;
+              actionCell.innerHTML = `
+                <button class="text-primary hover:text-primary/80 switch-btn" data-config="${config.name}">
+                  <i class="fa fa-exchange"></i> 切换到
+                </button>
+              `;
+            }
+            
+            row.appendChild(nameCell);
+            row.appendChild(sizeCell);
+            row.appendChild(modifiedCell);
+            row.appendChild(statusCell);
+            row.appendChild(actionCell);
+            
+            configTableBody.appendChild(row);
+          });
+          
+          // 为表格中的切换按钮添加事件监听器
+          document.querySelectorAll('.switch-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              const configName = btn.getAttribute('data-config');
+              configSelect.value = configName;
+              await switchConfig(configName);
+            });
+          });
+        } else {
+          showNotification('错误', data.message, 'error');
+        }
+      } catch (error) {
+        console.error('加载配置文件列表失败:', error);
+        showNotification('错误', '加载配置文件列表失败', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // 加载当前活动配置
+    async function loadActiveConfig() {
+      try {
+        const response = await fetch('/api/config/active');
+        const data = await response.json();
+        
+        if (data.status === 'success' && data.data) {
+          currentConfig.textContent = data.data.name;
+        } else {
+          currentConfig.textContent = '未找到活动配置';
+        }
+      } catch (error) {
+        console.error('加载当前活动配置失败:', error);
+        currentConfig.textContent = '加载活动配置失败';
+      }
+    }
+
+    // 设置事件监听器
+    function setupEventListeners() {
+      // 配置选择变更
+      configSelect.addEventListener('change', async () => {
+        const selectedConfig = configSelect.value;
+        switchConfigBtn.disabled = !selectedConfig;
+        
+        if (selectedConfig) {
+          await loadConfigPreview(selectedConfig);
+        } else {
+          configPreview.classList.add('hidden');
+        }
+      });
+      
+      // 切换配置按钮点击
+      switchConfigBtn.addEventListener('click', async () => {
+        const selectedConfig = configSelect.value;
+        if (selectedConfig) {
+          await switchConfig(selectedConfig);
+        }
+      });
+      
+      // 刷新按钮点击
+      refreshBtn.addEventListener('click', async () => {
+        await loadConfigFiles();
+        await loadActiveConfig();
+        showNotification('成功', '配置列表已刷新', 'success');
+      });
+      
+      // 关闭通知
+      closeNotification.addEventListener('click', () => {
+        hideNotification();
+      });
+    }
+
+    // 加载配置预览
+    async function loadConfigPreview(fileName) {
+      try {
+        const response = await fetch(`/api/config/content?file_name=${encodeURIComponent(fileName)}`);
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          configContent.textContent = data.data;
+          configPreview.classList.remove('hidden');
+        } else {
+          configPreview.classList.add('hidden');
+          showNotification('错误', '无法加载配置预览', 'error');
+        }
+      } catch (error) {
+        console.error('加载配置预览失败:', error);
+        configPreview.classList.add('hidden');
+        showNotification('错误', '加载配置预览失败', 'error');
+      }
+    }
+
+    // 切换配置
+    async function switchConfig(configName) {
+      // 检查是否选择了不同的配置
+      if (currentConfig.textContent === configName) {
+        showNotification('提示', '已激活此配置', 'info');
+        return;
+      }
+      
+      try {
+        showLoading();
+        
+        const response = await fetch('/api/config/switch', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ file_name: configName })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          showNotification('成功', data.message, 'success');
+          await loadActiveConfig();
+          await loadConfigFiles();
+        } else {
+          showNotification('错误', data.message, 'error');
+        }
+      } catch (error) {
+        console.error('切换配置失败:', error);
+        showNotification('错误', '切换配置失败', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // 显示通知
+    function showNotification(title, message, type = 'success') {
+      notificationTitle.textContent = title;
+      notificationMessage.textContent = message;
+      
+      // 设置通知样式
+      if (type === 'success') {
+        notification.className = 'fixed bottom-4 right-4 p-4 rounded-lg shadow-lg transform translate-y-0 opacity-100 transition-all duration-300 flex items-center space-x-3 z-50 bg-green-500';
+        notificationIcon.innerHTML = '<i class="fa fa-check-circle text-xl"></i>';
+      } else if (type === 'error') {
+        notification.className = 'fixed bottom-4 right-4 p-4 rounded-lg shadow-lg transform translate-y-0 opacity-100 transition-all duration-300 flex items-center space-x-3 z-50 bg-red-500';
+        notificationIcon.innerHTML = '<i class="fa fa-times-circle text-xl"></i>';
+      } else if (type === 'info') {
+        notification.className = 'fixed bottom-4 right-4 p-4 rounded-lg shadow-lg transform translate-y-0 opacity-100 transition-all duration-300 flex items-center space-x-3 z-50 bg-blue-500';
+        notificationIcon.innerHTML = '<i class="fa fa-info-circle text-xl"></i>';
+      }
+      
+      // 显示通知
+      notification.classList.remove('translate-y-20', 'opacity-0');
+      
+      // 自动关闭
+      setTimeout(() => {
+        hideNotification();
+      }, 5000);
+    }
+
+    // 隐藏通知
+    function hideNotification() {
+      notification.classList.add('translate-y-20', 'opacity-0');
+    }
+
+    // 显示加载动画
+    function showLoading() {
+      loadingOverlay.classList.remove('hidden');
+    }
+
+    // 隐藏加载动画
+    function hideLoading() {
+      loadingOverlay.classList.add('hidden');
+    }
+
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', initPage);
+  </script>
+</body>
+</html>    

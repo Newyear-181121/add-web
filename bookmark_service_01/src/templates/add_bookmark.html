@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加书签</title>
+    <!-- 引用外部JavaScript文件 -->
+    <script src="{{ url_for('static', filename='js/bookmark.js') }}"></script>
+</head>
+<body>
+    <h1>添加书签</h1>
+    <form id="addBookmarkForm">
+        <label for="group_name">分组名称:</label>
+        <select id="group_name" name="group_name">
+            <option value="" selected disabled>选择一个分组名称</option>
+            <!-- 初始加载时的书签组数据 -->
+            {% for group in groups %}
+            <option value="{{ group }}">{{ group }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" id="new_group_name" name="new_group_name" placeholder="输入一个新的书签组名称">
+        <br>
+        <label for="service_name">书签名:</label>
+        <input type="text" id="service_name" name="service_name" required><br>
+        <label for="abbr">缩写:</label>
+        <input type="text" id="abbr" name="abbr"><br>
+        <label for="url">URL地址:</label>
+        <input type="text" id="url" name="url" required><br>
+        <input type="submit" value="添加新书签">
+    </form>
+</body>
+</html>

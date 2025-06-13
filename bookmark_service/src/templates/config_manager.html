@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>配置文件管理系统</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3b82f6',
+            secondary: '#10b981',
+            danger: '#ef4444',
+            dark: '#1e293b',
+            light: '#f8fafc',
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .transition-custom {
+        transition: all 0.3s ease;
+      }
+      .shadow-custom {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      }
+      .card-hover {
+        @apply hover:shadow-lg hover:-translate-y-1 transition-all duration-300;
+      }
+    }
+  </style>
+</head>
+<body class="font-inter bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+  <!-- 顶部导航栏 -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <i class="fa fa-cogs text-primary text-2xl"></i>
+        <h1 class="text-xl font-bold text-dark">配置文件管理系统</h1>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button id="refreshBtn" class="flex items-center space-x-1 text-gray-600 hover:text-primary transition-custom">
+          <i class="fa fa-refresh"></i>
+          <span>刷新</span>
+        </button>
+        <button id="helpBtn" class="flex items-center space-x-1 text-gray-600 hover:text-primary transition-custom">
+          <i class="fa fa-question-circle"></i>
+          <span>帮助</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容区 -->
+  <main class="flex-grow container mx-auto px-4 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- 侧边栏 -->
+      <aside class="lg:col-span-3 bg-white rounded-xl shadow-custom p-4">
+        <h2 class="text-lg font-semibold mb-4 flex items-center">
+          <i class="fa fa-th-list text-primary mr-2"></i>功能导航
+        </h2>
+        <nav>
+          <ul class="space-y-2">
+            <li>
+              <a href="#" class="flex items-center p-2 rounded-lg hover:bg-gray-100 text-primary">
+                <i class="fa fa-bookmark-o mr-3"></i>添加书签
+              </a>
+            </li>
+            <li>
+              <a href="#" class="flex items-center p-2 rounded-lg bg-blue-50 text-primary font-medium">
+                <i class="fa fa-cog mr-3"></i>配置管理
+              </a>
+            </li>
+            <li>
+              <a href="#" class="flex items-center p-2 rounded-lg hover:bg-gray-100 text-gray-600">
+                <i class="fa fa-history mr-3"></i>历史记录
+              </a>
+            </li>
+            <li>
+              <a href="#" class="flex items-center p-2 rounded-lg hover:bg-gray-100 text-gray-600">
+                <i class="fa fa-bar-chart mr-3"></i>统计分析
+              </a>
+            </li>
+            <li>
+              <a href="#" class="flex items-center p-2 rounded-lg hover:bg-gray-100 text-gray-600">
+                <i class="fa fa-user mr-3"></i>用户设置
+              </a>
+            </li>
+          </ul>
+        </nav>
+        
+        <!-- 信息卡片 -->
+        <div class="mt-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
+          <h3 class="font-medium text-dark mb-2">配置帮助</h3>
+          <p class="text-sm text-gray-600">
+            配置文件管理系统允许您轻松切换不同的配置环境，提高工作效率。
+          </p>
+          <div class="mt-3">
+            <a href="#" class="text-xs text-primary hover:underline">查看详细文档 <i class="fa fa-arrow-right ml-1"></i></a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 主内容 -->
+      <section class="lg:col-span-9 space-y-6">
+        <!-- 页面标题 -->
+        <div class="bg-white rounded-xl shadow-custom p-4">
+          <h2 class="text-xl font-bold text-dark flex items-center">
+            <i class="fa fa-cog text-primary mr-2"></i>配置文件管理
+            <span class="ml-2 text-sm font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-full">Beta</span>
+          </h2>
+          <p class="text-gray-600 mt-1">管理和切换不同的配置文件，满足多样化的工作需求</p>
+        </div>
+
+        <!-- 配置状态卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-white rounded-xl shadow-custom p-5 card-hover">
+            <div class="flex items-start justify-between">
+              <div>
+                <h3 class="text-lg font-semibold text-dark">当前活动配置</h3>
+                <p id="activeConfig" class="text-xl font-bold text-primary mt-2">default_config.json</p>
+                <p class="text-sm text-gray-500 mt-1">配置文件最后更新于 <span id="configLastUpdated">2023-06-15 14:30</span></p>
+              </div>
+              <div class="bg-blue-50 p-3 rounded-lg">
+                <i class="fa fa-check-circle text-primary text-2xl"></i>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-xl shadow-custom p-5 card-hover">
+            <div class="flex items-start justify-between">
+              <div>
+                <h3 class="text-lg font-semibold text-dark">配置文件总数</h3>
+                <p id="configCount" class="text-xl font-bold text-secondary mt-2">5 个</p>
+                <p class="text-sm text-gray-500 mt-1">可用配置文件</p>
+              </div>
+              <div class="bg-green-50 p-3 rounded-lg">
+                <i class="fa fa-file-text-o text-secondary text-2xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 配置文件管理卡片 -->
+        <div class="bg-white rounded-xl shadow-custom p-5">
+          <h3 class="text-lg font-semibold text-dark mb-4">切换配置文件</h3>
+          
+          <div class="mb-4">
+            <p class="text-sm text-gray-600 mb-3">选择要激活的配置文件，系统将自动加载并应用新配置。</p>
+            
+            <div class="flex flex-col sm:flex-row gap-3">
+              <div class="relative flex-grow">
+                <select id="configSelect" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-custom appearance-none">
+                  <option value="">请选择配置文件...</option>
+                  <!-- 配置文件选项将通过JavaScript动态加载 -->
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                  <i class="fa fa-chevron-down text-gray-400"></i>
+                </div>
+              </div>
+              
+              <button id="switchConfigBtn" class="bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg font-medium flex items-center justify-center space-x-2 transition-custom shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fa fa-exchange"></i>
+                <span>切换配置</span>
+              </button>
+            </div>
+          </div>
+          
+          <div id="configPreview" class="mt-6 bg-gray-50 rounded-lg p-4 hidden">
+            <h4 class="font-medium text-gray-700 mb-2 flex items-center">
+              <i class="fa fa-eye mr-2 text-primary"></i>配置预览
+            </h4>
+            <div class="bg-gray-800 text-gray-100 rounded-md p-3 overflow-x-auto text-sm font-mono max-h-60">
+              <pre id="configContent">{
+  "app_name": "Bookmark Service",
+  "host": "localhost",
+  "port": 8000,
+  "debug": true,
+  "database": {
+    "type": "sqlite",
+    "path": "data/bookmarks.db"
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  }
+}</pre>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 配置文件列表 -->
+        <div class="bg-white rounded-xl shadow-custom p-5">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-dark">配置文件列表</h3>
+            <div class="relative">
+              <input type="text" id="configSearch" placeholder="搜索配置文件..." class="pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-custom text-sm">
+              <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            </div>
+          </div>
+          
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">配置文件名</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">大小</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">修改时间</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                  <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                </tr>
+              </thead>
+              <tbody id="configTableBody" class="bg-white divide-y divide-gray-200">
+                <!-- 配置文件列表将通过JavaScript动态加载 -->
+              </tbody>
+            </table>
+          </div>
+          
+          <div id="emptyConfigState" class="py-10 text-center hidden">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+              <i class="fa fa-folder-open-o text-gray-400 text-2xl"></i>
+            </div>
+            <h4 class="text-gray-500 font-medium">没有找到配置文件</h4>
+            <p class="text-sm text-gray-400 mt-2">请确保配置目录中有可用的配置文件</p>
+          </div>
+          
+          <div class="mt-4 flex justify-between items-center">
+            <div class="text-sm text-gray-500">显示 1-5 条，共 5 条</div>
+            <div class="flex space-x-1">
+              <button class="px-3 py-1 rounded border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <i class="fa fa-chevron-left text-xs"></i>
+              </button>
+              <button class="px-3 py-1 rounded border border-primary bg-primary text-white">1</button>
+              <button class="px-3 py-1 rounded border border-gray-200 text-gray-700 hover:bg-gray-50">2</button>
+              <button class="px-3 py-1 rounded border border-gray-200 text-gray-700 hover:bg-gray-50">
+                <i class="fa fa-chevron-right text-xs"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 配置历史记录 -->
+        <div class="bg-white rounded-xl shadow-custom p-5">
+          <h3 class="text-lg font-semibold text-dark mb-4">配置变更历史</h3>
+          
+          <div class="space-y-4">
+            <div class="flex items-start space-x-3 pb-4 border-b border-gray-100">
+              <div class="flex-shrink-0 bg-green-50 p-2 rounded-full">
+                <i class="fa fa-check text-green-500"></i>
+              </div>
+              <div class="flex-grow">
+                <div class="flex justify-between">
+                  <h4 class="font-medium text-gray-800">切换到 production_config.json</h4>
+                  <span class="text-xs text-gray-500">今天 14:30</span>
+                </div>
+                <p class="text-sm text-gray-600 mt-1">由 admin 用户操作</p>
+              </div>
+            </div>
+            
+            <div class="flex items-start space-x-3 pb-4 border-b border-gray-100">
+              <div class="flex-shrink-0 bg-green-50 p-2 rounded-full">
+                <i class="fa fa-check text-green-500"></i>
+              </div>
+              <div class="flex-grow">
+                <div class="flex justify-between">
+                  <h4 class="font-medium text-gray-800">切换到 staging_config.json</h4>
+                  <span class="text-xs text-gray-500">今天 10:15</span>
+                </div>
+                <p class="text-sm text-gray-600 mt-1">由 admin 用户操作</p>
+              </div>
+            </div>
+            
+            <div class="flex items-start space-x-3 pb-4 border-b border-gray-100">
+              <div class="flex-shrink-0 bg-green-50 p-2 rounded-full">
+                <i class="fa fa-check text-green-500"></i>
+              </div>
+              <div class="flex-grow">
+                <div class="flex justify-between">
+                  <h4 class="font-medium text-gray-800">切换到 default_config.json</h4>
+                  <span class="text-xs text-gray-500">昨天 16:45</span>
+                </div>
+                <p class="text-sm text-gray-600 mt-1">由 test_user 用户操作</p>
+              </div>
+            </div>
+            
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0 bg-green-50 p-2 rounded-full">
+                <i class="fa fa-check text-green-500"></i>
+              </div>
+              <div class="flex-grow">
+                <div class="flex justify-between">
+                  <h4 class="font-medium text-gray-800">创建了 new_feature_config.json</h4>
+                  <span class="text-xs text-gray-500">昨天 14:20</span>
+                </div>
+                <p class="text-sm text-gray-600 mt-1">由 developer 用户操作</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-4 text-right">
+            <button class="text-primary hover:text-primary/80 text-sm font-medium flex items-center justify-center mx-auto md:mx-0">
+              查看所有历史记录 <i class="fa fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="bg-white border-t border-gray-200 py-6">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-4 md:mb-0">
+          <p class="text-sm text-gray-500">© 2023 配置文件管理系统. 保留所有权利.</p>
+        </div>
+        <div class="flex space-x-6">
+          <a href="#" class="text-gray-500 hover:text-primary transition-custom">
+            <i class="fa fa-github text-xl"></i>
+          </a>
+          <a href="#" class="text-gray-500 hover:text-primary transition-custom">
+            <i class="fa fa-twitter text-xl"></i>
+          </a>
+          <a href="#" class="text-gray-500 hover:text-primary transition-custom">
+            <i class="fa fa-linkedin text-xl"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 通知提示框 -->
+  <div id="notification" class="fixed bottom-4 right-4 p-4 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-3 z-50">
+    <div id="notificationIcon" class="flex-shrink-0">
+      <i class="fa fa-check-circle text-xl"></i>
+    </div>
+    <div class="flex-grow">
+      <h4 id="notificationTitle" class="font-medium text-white"></h4>
+      <p id="notificationMessage" class="text-sm text-white/80 mt-1"></p>
+    </div>
+    <button id="closeNotification" class="flex-shrink-0 text-white/80 hover:text-white">
+      <i class="fa fa-times"></i>
+    </button>
+  </div>
+
+  <!-- 加载动画 -->
+  <div id="loadingOverlay" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl p-6 shadow-2xl flex flex-col items-center">
+      <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <p class="mt-4 font-medium text-gray-800" id="loadingText">正在切换配置...</p>
+    </div>
+  </div>
+
+  <script>
+    // 模拟配置文件数据
+    const mockConfigFiles = [
+      {
+        name: 'default_config.json',
+        size: '2.4 KB',
+        modified: '2023-06-15 14:30',
+        active: true,
+        content: JSON.stringify({
+          app_name: "Bookmark Service",
+          host: "localhost",
+          port: 8000,
+          debug: true,
+          database: {
+            type: "sqlite",
+            path: "data/bookmarks.db"
+          },
+          logging: {
+            level: "INFO",
+            format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+          }
+        }, null, 2)
+      },
+      {
+        name: 'production_config.json',
+        size: '2.5 KB',
+        modified: '2023-06-14 09:15',
+        active: false,
+        content: JSON.stringify({
+          app_name: "Bookmark Service",
+          host: "0.0.0.0",
+          port: 80,
+          debug: false,
+          database: {
+            type: "postgres",
+            host: "db-server",
+            port: 5432,
+            name: "bookmarks",
+            user: "postgres",
+            password: "your_password"
+          },
+          logging: {
+            level: "WARNING",
+            format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+          }
+        }, null, 2)
+      },
+      {
+        name: 'staging_config.json',
+        size: '2.4 KB',
+        modified: '2023-06-12 16:40',
+        active: false,
+        content: JSON.stringify({
+          app_name: "Bookmark Service (Staging)",
+          host: "0.0.0.0",
+          port: 8080,
+          debug: true,
+          database: {
+            type: "postgres",
+            host: "staging-db-server",
+            port: 5432,
+            name: "bookmarks_staging",
+            user: "postgres",
+            password: "staging_password"
+          },
+          logging: {
+            level: "INFO",
+            format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+          }
+        }, null, 2)
+      },
+      {
+        name: 'test_config.json',
+        size: '2.3 KB',
+        modified: '2023-06-10 11:25',
+        active: false,
+        content: JSON.stringify({
+          app_name: "Bookmark Service (Test)",
+          host: "localhost",
+          port: 9000,
+          debug: true,
+          database: {
+            type: "sqlite",
+            path: "data/test_bookmarks.db"
+          },
+          logging: {
+            level: "DEBUG",
+            format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+          }
+        }, null, 2)
+      },
+      {
+        name: 'new_feature_config.json',
+        size: '2.6 KB',
+        modified: '2023-06-09 15:50',
+        active: false,
+        content: JSON.stringify({
+          app_name: "Bookmark Service (New Feature)",
+          host: "localhost",
+          port: 8001,
+          debug: true,
+          database: {
+            type: "sqlite",
+            path: "data/new_feature_bookmarks.db"
+          },
+          new_feature: {
+            enabled: true,
+            experimental: true
+          },
+          logging: {
+            level: "DEBUG",
+            format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+          }
+        }, null, 2)
+      }
+    ];
+
+    // DOM 元素
+    const configSelect = document.getElementById('configSelect');
+    const switchConfigBtn = document.getElementById('switchConfigBtn');
+    const configPreview = document.getElementById('configPreview');
+    const configContent = document.getElementById('configContent');
+    const configTableBody = document.getElementById('configTableBody');
+    const activeConfig = document.getElementById('activeConfig');
+    const configCount = document.getElementById('configCount');
+    const configLastUpdated = document.getElementById('configLastUpdated');
+    const emptyConfigState = document.getElementById('emptyConfigState');
+    const notification = document.getElementById('notification');
+    const notificationTitle = document.getElementById('notificationTitle');
+    const notificationMessage = document.getElementById('notificationMessage');
+    const notificationIcon = document.getElementById('notificationIcon');
+    const closeNotification = document.getElementById('closeNotification');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingText = document.getElementById('loadingText');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const configSearch = document.getElementById('configSearch');
+
+    // 初始化页面
+    function initPage() {
+      loadConfigFiles();
+      setupEventListeners();
+    }
+
+    // 加载配置文件
+    function loadConfigFiles() {
+      // 清空现有选项
+      configSelect.innerHTML = '<option value="">请选择配置文件...</option>';
+      configTableBody.innerHTML = '';
+      
+      // 检查是否有配置文件
+      if (mockConfigFiles.length === 0) {
+        emptyConfigState.classList.remove('hidden');
+        return;
+      }
+      
+      emptyConfigState.classList.add('hidden');
+      configCount.textContent = `${mockConfigFiles.length} 个`;
+      
+      // 添加配置文件选项
+      mockConfigFiles.forEach(config => {
+        const option = document.createElement('option');
+        option.value = config.name;
+        option.textContent = config.name;
+        if (config.active) {
+          option.selected = true;
+          activeConfig.textContent = config.name;
+          configLastUpdated.textContent = config.modified;
+        }
+        configSelect.appendChild(option);
+        
+        // 添加到表格
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50 transition-custom';
+        
+        const nameCell = document.createElement('td');
+        nameCell.className = 'px-6 py-4 whitespace-nowrap';
+        nameCell.innerHTML = `
+          <div class="flex items-center">
+            <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-md flex items-center justify-center">
+              <i class="fa fa-file-code-o text-primary"></i>
+            </div>
+            <div class="ml-4">
+              <div class="text-sm font-medium text-gray-900">${config.name}</div>
+            </div>
+          </div>
+        `;
+        
+        const sizeCell = document.createElement('td');
+        sizeCell.className = 'px-6 py-4 whitespace-nowrap';
+        sizeCell.innerHTML = `
+          <div class="text-sm text-gray-500">${config.size}</div>
+        `;
+        
+        const modifiedCell = document.createElement('td');
+        modifiedCell.className = 'px-6 py-4 whitespace-nowrap';
+        modifiedCell.innerHTML = `
+          <div class="text-sm text-gray-500">${config.modified}</div>
+        `;
+        
+        const statusCell = document.createElement('td');
+        statusCell.className = 'px-6 py-4 whitespace-nowrap';
+        if (config.active) {
+          statusCell.innerHTML = `
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+              已激活
+            </span>
+          `;
+        } else {
+          statusCell.innerHTML = `
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+              未激活
+            </span>
+          `;
+        }
+        
+        const actionCell = document.createElement('td');
+        actionCell.className = 'px-6 py-4 whitespace-nowrap text-right text-sm font-medium';
+        
+        if (config.active) {
+          actionCell.innerHTML = `
+            <button class="text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed" disabled>
+              <i class="fa fa-check-circle"></i> 已激活
+            </button>
+          `;
+        } else {
+          actionCell.innerHTML = `
+            <button class="text-primary hover:text-primary/80 switch-btn" data-config="${config.name}">
+              <i class="fa fa-exchange"></i> 切换到
+            </button>
+          `;
+        }
+        
+        row.appendChild(nameCell);
+        row.appendChild(sizeCell);
+        row.appendChild(modifiedCell);
+        row.appendChild(statusCell);
+        row.appendChild(actionCell);
+        
+        configTableBody.appendChild(row);
+      });
+      
+      // 为表格中的切换按钮添加事件监听器
+      document.querySelectorAll('.switch-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const configName = btn.getAttribute('data-config');
+          configSelect.value = configName;
+          showConfigPreview(configName);
+          switchConfig(configName);
+        });
+      });
+    }
+
+    // 设置事件监听器
+    function setupEventListeners() {
+      // 配置选择变更
+      configSelect.addEventListener('change', () => {
+        const selectedConfig = configSelect.value;
+        if (selectedConfig) {
+          showConfigPreview(selectedConfig);
+        } else {
+          configPreview.classList.add('hidden');
+        }
+      });
+      
+      // 切换配置按钮点击
+      switchConfigBtn.addEventListener('click', () => {
+        const selectedConfig = configSelect.value;
+        if (selectedConfig) {
+          switchConfig(selectedConfig);
+        }
+      });
+      
+      // 关闭通知
+      closeNotification.addEventListener('click', () => {
+        hideNotification();
+      });
+      
+      // 刷新按钮点击
+      refreshBtn.addEventListener('click', () => {
+        showLoading('正在刷新配置列表...');
+        setTimeout(() => {
+          loadConfigFiles();
+          hideLoading();
+          showNotification('成功', '配置列表已刷新', 'success');
+        }, 800);
+      });
+      
+      // 配置搜索
+      configSearch.addEventListener('input', () => {
+        const searchTerm = configSearch.value.toLowerCase();
+        const rows = configTableBody.querySelectorAll('tr');
+        
+        rows.forEach(row => {
+          const configName = row.querySelector('td:first-child div:last-child div').textContent.toLowerCase();
+          if (configName.includes(searchTerm)) {
+            row.classList.remove('hidden');
+          } else {
+            row.classList.add('hidden');
+          }
+        });
+        
+        // 检查是否所有行都被隐藏
+        const visibleRows = Array.from(rows).filter(row => !row.classList.contains('hidden'));
+        if (visibleRows.length === 0) {
+          emptyConfigState.classList.remove('hidden');
+        } else {
+          emptyConfigState.classList.add('hidden');
+        }
+      });
+    }
+
+    // 显示配置预览
+    function showConfigPreview(configName) {
+      const config = mockConfigFiles.find(c => c.name === configName);
+      if (config) {
+        configContent.textContent = config.content;
+        configPreview.classList.remove('hidden');
+      }
+    }
+
+    // 切换配置
+    function switchConfig(configName) {
+      // 检查是否选择了不同的配置
+      const currentActiveConfig = mockConfigFiles.find(c => c.active);
+      if (currentActiveConfig && currentActiveConfig.name === configName) {
+        showNotification('提示', '已激活此配置', 'info');
+        return;
+      }
+      
+      // 显示加载动画
+      showLoading('正在切换配置...');
+      
+      // 模拟API请求
+      setTimeout(() => {
+        // 更新配置文件状态
+        mockConfigFiles.forEach(config => {
+          config.active = config.name === configName;
+        });
+        
+        // 隐藏加载动画
+        hideLoading();
+        
+        // 显示成功通知
+        showNotification('成功', `已切换到 ${configName} 配置`, 'success');
+        
+        // 更新UI
+        loadConfigFiles();
+      }, 1500);
+    }
+
+    // 显示通知
+    function showNotification(title, message, type = 'success') {
+      notificationTitle.textContent = title;
+      notificationMessage.textContent = message;
+      
+      // 设置通知样式
+      if (type === 'success') {
+        notification.className = 'fixed bottom-4 right-4 p-4 rounded-lg shadow-lg transform translate-y-0 opacity-100 transition-all duration-300 flex items-center space-x-3 z-50 bg-green-500';
+        notificationIcon.innerHTML = '<i class="fa fa-check-circle text-xl"></i>';
+      } else if (type === 'error') {
+        notification.className = 'fixed bottom-4 right-4 p-4 rounded-lg shadow-lg transform translate-y-0 opacity-100 transition-all duration-300 flex items-center space-x-3 z-50 bg-red-500';
+        notificationIcon.innerHTML = '<i class="fa fa-times-circle text-xl"></i>';
+      } else if (type === 'info') {
+        notification.className = 'fixed bottom-4 right-4 p-4 rounded-lg shadow-lg transform translate-y-0 opacity-100 transition-all duration-300 flex items-center space-x-3 z-50 bg-blue-500';
+        notificationIcon.innerHTML = '<i class="fa fa-info-circle text-xl"></i>';
+      }
+      
+      // 显示通知
+      notification.classList.remove('translate-y-20', 'opacity-0');
+      
+      // 自动关闭
+      setTimeout(() => {
+        hideNotification();
+      }, 5000);
+    }
+
+    // 隐藏通知
+    function hideNotification() {
+      notification.classList.add('translate-y-20', 'opacity-0');
+    }
+
+    // 显示加载动画
+    function showLoading(text = '加载中...') {
+      loadingText.textContent = text;
+      loadingOverlay.classList.remove('hidden');
+    }
+
+    // 隐藏加载动画
+    function hideLoading() {
+      loadingOverlay.classList.add('hidden');
+    }
+
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', initPage);
+  </script>
+</body>
+</html>    
