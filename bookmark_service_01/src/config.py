@@ -4,10 +4,10 @@ import yaml
 import logging
 
 # 配置日志
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[config] - %(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+# logging.basicConfig(
+#     level=logging.DEBUG,
+#     format='[config] - %(asctime)s - %(name)s - %(levelname)s - %(message)s'
+# )
 logger = logging.getLogger(__name__)
 
 # 书签配置文件的路径
@@ -21,20 +21,26 @@ def get_all_filenames(path=BOOKMARK_DIRS):
     :return: 文件名列表
     """
     if not path:
-        print("路径为空,使用默认配置文件！")
         path = BOOKMARK_DIRS
+        logger.debug(f"路径为空,使用默认配置文件路径！ {BOOKMARK_DIRS}")
     # 确保路径是绝对路径
     path = os.path.abspath(path)  
     if not os.path.exists(path):
-        print(f"路径不存在: {path}")
         return []
 
     try:
         if os.path.exists(path) and os.path.isdir(path):
-            return [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+            # os.listdir(path)：列出给定路径 path 下的所有文件和子目录的名称（不包含完整路径）。
+            # os.path.join(path, f)：将 path 和文件名 f 拼接成完整路径，用于后续判断是否为文件。
+            # os.path.isFile(...)：判断拼接后的路径是否为文件（而不是目录）。
+            # [f for f in ... if ...]：这是一个列表推导式，遍历所有文件名，仅保留满足条件（是文件）的文件名。
+            # 总结：这行代码返回一个列表，包含 path 目录下的所有文件名（不包括子目录）。
+            result = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+            logger.debug(f"获取到 {len(result)} 个文件名: {result}")
+            return result
         return []
     except Exception as e:
-        print(f"错误的获取文件名列表: {e}")
+        logger.error(f"错误的获取文件名列表: {e}")
         return []
 
 def get_yaml_file_content(dirs=BOOKMARK_DIRS, file_name="bookmarks.yaml"):

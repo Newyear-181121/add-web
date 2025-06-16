@@ -4,10 +4,10 @@ from add_bookmark import load_bookmarks, add_bookmark, save_bookmarks
 from config import get_all_filenames, get_yaml_file_content
 
 # 配置日志
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[api] - %(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+# logging.basicConfig(
+#     level=logging.DEBUG,
+#     format='[api] - %(asctime)s - %(name)s - %(levelname)s - %(message)s'
+# )
 logger = logging.getLogger(__name__)
 
 def api_get_bookmarks():
@@ -80,9 +80,6 @@ def api_get_configs(dir):
     logger.info(f"收到获取配置文件列表的请求，目录: {dir}")
     
     try:
-        if not dir:
-            logger.warning("目录路径为空, 返回默认配置目录")
-        
         # 获取指定目录下的所有文件名
         filenames = get_all_filenames(dir)
         
@@ -90,7 +87,7 @@ def api_get_configs(dir):
             logger.info("没有找到任何配置文件")
             return jsonify({'message': '没有找到配置文件。', 'files': []})
         
-        logger.info(f"成功获取 {dir} 目录下的 {len(filenames)} 个配置文件")
+        logger.info(f"成功获取 {len(filenames)} 个配置文件")
         return jsonify({'files': filenames, 'code': 200})
     except Exception as e:
         logger.error(f"获取配置文件列表失败: {str(e)}", exc_info=True)

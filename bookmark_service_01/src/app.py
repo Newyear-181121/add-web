@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import logging
 from api import api_get_bookmarks, api_add_bookmark, api_save_bookmarks, api_get_configs, api_get_yaml_content
+from config import get_all_filenames
 from add_bookmark import get_bookmarks_groups
 
 app = Flask(__name__)
@@ -8,7 +9,7 @@ app = Flask(__name__)
 # 配置日志
 logging.basicConfig(
     level=logging.DEBUG,
-    format='[app] - %(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format='[ny] - %(name)s - %(asctime)s  - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,18 @@ def index():
         logger.error("获取书签分组列表失败: %s", str(e))
         return jsonify({"error": "获取书签分组失败"}), 500
 
-
+@app.route('/config')
+def config_manager():
+    """
+    渲染配置管理页面。
+    :return: 渲染后的HTML页面
+    """
+    try:
+        files = get_all_filenames()
+        logger.info("成功获取配置文件列表，共 %d 个配置文件", len(files))
+        return render_template('config.html', files=files)
+    except Exception as e:
+        logger.error("获取配置文件列表失败: %s", str(e))
 
 @app.route('/api/bookmarks', methods=['GET'])
 def get_bookmarks():
@@ -107,7 +119,7 @@ def get_configs():
     
     try:
         dir = request.args.get('dir')
-        logger.debug("请求参数: %s", request.args)
+        logger.debug("请求参数: %s", jsonify(request.args))
         
         # 调用API处理函数
         response = api_get_configs(dir)

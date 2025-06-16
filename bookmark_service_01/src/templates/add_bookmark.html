@@ -6,19 +6,8 @@
     <title>添加书签</title>
     <!-- 引用外部JavaScript文件 -->
     <script src="{{ url_for('static', filename='js/bookmark.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
 </head>
 <body>
-    <h1>选择配置文件</h1>
-    <label for="configSelect">选择配置文件:</label>
-    <select id="configSelect" name="configSelect">
-        <option value="" selected disabled>请选择配置文件...</option>
-        <!-- 初始加载时的书签组数据 -->
-            {% for data in datas %}
-            <option value="{{ data }}">{{ data }}</option>
-            {% endfor %}
-    </select>
-    <br>
 
     <h1>添加书签</h1>
     <form id="addBookmarkForm">
