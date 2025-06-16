@@ -1,1 +1,15 @@
-/home/ny/env/docker/services/homepage/config/bookmarks.yaml
+- Developer:
+  - Github:
+    - abbr: GH-1
+      href: https://github.com/
+  - '123':
+    - abbr: ts
+      href: http://test.test
+- Social:
+  - Reddit:
+    - abbr: RE-1
+      href: https://reddit.com/
+- Entertainment:
+  - YouTube:
+    - abbr: YT
+      href: https://youtube.com/

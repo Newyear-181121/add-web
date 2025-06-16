@@ -12,3 +12,10 @@ services:
     environment:
       - FLASK_DEBUG=1  # 启用Flask调试模式
     command: flask run --host=0.0.0.0 --port=5000  # 使用Flask开发服务器
+    networks:
+      ny-service:
+        ipv4_address: 172.18.186.201
+
+networks:
+  ny-service:
+    external: true
