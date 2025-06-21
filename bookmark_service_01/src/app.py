@@ -3,6 +3,7 @@ import logging
 from api import api_get_bookmarks, api_add_bookmark, api_save_bookmarks, api_get_configs, api_get_yaml_content
 from config import get_all_filenames
 from add_bookmark import get_bookmarks_groups
+import api_change_config 
 
 app = Flask(__name__)
 
@@ -153,3 +154,27 @@ def get_yaml_content():
     except Exception as e:
         logger.error("处理获取YAML文件内容请求时发生错误: %s", str(e))
         return jsonify({"error": "获取YAML文件内容失败"}), 500
+    
+
+
+# ---------------------------------------------------------------------------------------
+# 翻页接口
+@app.route('/api/bookmarks/change_page', methods=['GET'])
+def api_change_page():
+    """
+    处理翻页的API请求。
+    :return: 操作结果的JSON响应
+    """
+    logger.info("收到翻页的请求: %s", request.remote_addr)
+    
+    try:
+        
+        # 调用API处理函数
+        api_change_config.change_page_config()
+    except Exception as e:
+        logger.error("处理翻页请求时发生错误: %s", str(e))
+        return jsonify({"error": "翻页失败"}), 500
+    else:
+        # 打印响应信息
+        logger.info("翻页成功，状态码: %s", 200)
+        return jsonify({"msg": "翻页成功"}), 200
