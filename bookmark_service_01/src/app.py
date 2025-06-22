@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 import logging
 from api import api_get_bookmarks, api_add_bookmark, api_save_bookmarks, api_get_configs, api_get_yaml_content
 from config import get_all_filenames
@@ -177,4 +177,5 @@ def api_change_page():
     else:
         # 打印响应信息
         logger.info("翻页成功，状态码: %s", 200)
-        return jsonify({"msg": "翻页成功"}), 200
+        # 返回一个新的页面地址
+        return redirect('http://home.ny.nuc/')
