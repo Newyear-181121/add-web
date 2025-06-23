@@ -9,8 +9,15 @@ app = Flask(__name__)
 
 # 配置日志
 logging.basicConfig(
-    level=logging.DEBUG,
-    format='[ny] - %(name)s - %(asctime)s  - %(levelname)s - %(message)s'
+    # 最低日志级设置
+    level=logging.WARNING,
+    format='%(asctime)s - %(levelname)s - [%(filename)s] - %(name)s - %(message)s',
+    # 设置日志文件路径
+    filename='configs/logs/add_bookmark.log',
+    # 文件不存在则自动创建
+    filemode='a',
+    encoding='utf-8',
+    # force=True  # 强制覆盖之前的配置
 )
 logger = logging.getLogger(__name__)
 

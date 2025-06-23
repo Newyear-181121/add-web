@@ -4,11 +4,11 @@ import logging
 import os
 
 # 配置日志
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(filename)s] - %(asctime)s - %(name)s - %(levelname)s - %(message)s',
+# logging.basicConfig(
+    # level=logging.DEBUG,
+    # format='[%(filename)s] - %(asctime)s - %(name)s - %(levelname)s - %(message)s',
     # force=True  # 强制覆盖之前的配置
-)
+# )
 logger = logging.getLogger(__name__)
 
 
